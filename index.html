@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>碰壁反弹</title>
+    <style type="text/css">
+        #wrap {
+            width: 400px;
+            height: 500px;
+            border: 1px solid green;
+            margin: 100px auto 0px;
+            position: relative;
+            overflow: hidden;  /* 确保小球不会超出边界 */
+        }
+        .ball {
+            background: black;
+            border-radius: 50%;
+            position: absolute;
+        }
+    </style>
+</head>
+<body>
+    <div id="wrap"></div>
+
+    <script type="text/javascript">
+        const wrap = document.getElementById('wrap');
+        const colors = ['red', 'blue', 'green', 'orange', 'black', 'pink'];
+        const balls = [];
+        const numBalls = 15;
+        const speedFactor = 3; // 增加这个值以加快速度
+
+        // 初始化小球
+        for (let i = 0; i < numBalls; i++) {
+            const ball = document.createElement('div');
+            ball.classList.add('ball');
+            const size = Math.random() * 30 + 20; // 随机大小在20px到50px之间
+            ball.style.width = size + 'px';
+            ball.style.height = size + 'px';
+            ball.style.background = colors[Math.floor(Math.random() * colors.length)];
+            ball.style.left = Math.random() * (wrap.clientWidth - size) + 'px';
+            ball.style.top = Math.random() * (wrap.clientHeight - size) + 'px';
+            wrap.appendChild(ball);
+            balls.push({
+                element: ball,
+                position: {
+                    x: parseFloat(ball.style.left),
+                    y: parseFloat(ball.style.top)
+                },
+                velocity: {
+                    x: (Math.random() < 0.5 ? 1 : -1) * (Math.random() * 2 + 1) * speedFactor,
+                    y: (Math.random() < 0.5 ? 1 : -1) * (Math.random() * 2 + 1) * speedFactor
+                },
+                size: size // 保存小球的大小
+            });
+        }
+
+        setInterval(function() {
+            for (let i = 0; i < balls.length; i++) {
+                const ball = balls[i];
+
+                // 更新小球的位置
+                ball.position.x += ball.velocity.x;
+                ball.position.y += ball.velocity.y;
+
+                // 碰到边缘反弹
+                if (ball.position.x >= wrap.clientWidth - ball.size || ball.position.x < 0) {
+                    ball.velocity.x *= -1;
+                }
+                if (ball.position.y >= wrap.clientHeight - ball.size || ball.position.y < 0) {
+                    ball.velocity.y *= -1;
+                }
+
+                // 更新小球样式
+                ball.element.style.left = ball.position.x + 'px';
+                ball.element.style.top = ball.position.y + 'px';
+            }
+
+            // 检测小球之间的碰撞
+            for (let i = 0; i < balls.length; i++) {
+                for (let j = i + 1; j < balls.length; j++) {
+                    if (isColliding(balls[i], balls[j])) {
+                        changeColor(balls[i].element);
+                        changeColor(balls[j].element);
+                    }
+                }
+            }
+        }, 20);
+
+        function isColliding(ballA, ballB) {
+            const dx = ballA.position.x - ballB.position.x;
+            const dy = ballA.position.y - ballB.position.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            return distance < (ballA.size / 2 + ballB.size / 2); // 碰撞检测，考虑球的半径
+        }
+
+        function changeColor(ballElement) {
+            const colIndex = Math.floor(Math.random() * colors.length);
+            ballElement.style.background = colors[colIndex];
+        }
+    </script>
+</body>
+</html>
